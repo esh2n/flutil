@@ -1,0 +1,29 @@
+#!/bin/sh
+ARCH=$(uname -m)
+echo "Your PC is on $ARCH..."
+echo "Excute HARD cache clearing..."
+flutter clean
+flutter pub pub cache repair
+rm -Rf ios/Pods
+rm -Rf ios/.symlinks
+rm -Rf ios/Flutter/Flutter.framework
+rm -Rf ios/Flutter/Flutter.podspec
+rm ios/Podfile.lock
+rm -rf ~/Library/Caches/com.apple.dt.Xcode
+rm -rf ~/Library/Developer/Xcode/DerivedData/
+if [ "$ARCH" = "arm64" ]; then
+    cd ios
+    arch -x86_64 pod cache clean --all
+    cd ../
+    flutter pub get
+    cd ios
+    arch -x86_64 pod install --repo-update
+elif [ "$ARCH" = "x86_64" ]; then
+    cd ios
+    pod cache clean --all
+    cd ../
+    flutter pub get
+    cd ios
+    pod install --repo-update
+fi
+echo 'done';
